@@ -1,5 +1,6 @@
 const fs = require('fs');
 const discord = require('discord.js');
+const keep_alive = require('./keep_alive.js')
 
 const client = new discord.Client({
     disableMentions: 'everyone'
