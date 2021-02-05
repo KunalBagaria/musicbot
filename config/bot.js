@@ -9,7 +9,7 @@ module.exports = {
 
     discord: {
         prefix: '$',
-        activity: 'Quality Music 24x7'
+        activity: 'Quality Music 24x7',
     },
 
     filters: ['8D', 'gate', 'haas', 'phaser', 'treble', 'tremolo', 'vibrato', 'reverse', 'karaoke', 'flanger', 'mcompand', 'pulsator', 'subboost', 'bassboost', 'vaporwave', 'nightcore', 'normalizer', 'surrounding'],
