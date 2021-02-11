@@ -1,20 +1,15 @@
 const fs = require('fs');
 const discord = require('discord.js');
 
-const client = new discord.Client({
-    disableMentions: 'everyone'
-});
+const client = new discord.Client({ disableMentions: 'everyone' });
 
-const {
-    Player
-} = require('discord-player');
+const { Player } = require('discord-player');
 
 client.player = new Player(client, {
     leaveOnEmpty: false,
     leaveOnStop: false,
     leaveOnEmpty: false,
 });
-
 client.config = require('./config/bot');
 client.emotes = client.config.emojis;
 client.filters = client.config.filters;
@@ -45,4 +40,4 @@ for (const file of player) {
     client.player.on(file.split(".")[0], event.bind(null, client));
 };
 
-client.login(process.env.DISCORD_BOT_SECRET);
+client.login(client.config.discord.token);

@@ -42,7 +42,7 @@
     semver "^7.3.0"
     tar "^6.0.2"
 
-"@discordjs/opus@0.3.3":
+"@discordjs/opus@^0.3.3":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@discordjs/opus/-/opus-0.3.3.tgz#d3a9165b817ca477164ee28315aef259c1cdab48"
   integrity sha512-n3hUs4RY0K8cz8vJ2GiZE4EdJlexoxs1vGsaft5lZlAnU6wsZfncpv4px+HVOMKN8ddtjriGfsrG4lVkAyZcmQ==
@@ -258,7 +258,7 @@ detect-libc@^1.0.3:
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-1.0.3.tgz#fa137c4bd698edf55cd5cd02ac559f91a4c4ba9b"
   integrity sha1-+hN8S9aY7fVc1c0CrFWfkaTEups=
 
-discord-player@^3.2.1:
+discord-player@^3.2.0:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/discord-player/-/discord-player-3.2.1.tgz#2b04328e410d7e11bae5dee3b510d7da5c269093"
   integrity sha512-mkyoqHcmWxkGXXmbQW5FJlPWeq1IrP18q/fAk3Dy5Q838l6+i1oXAJujzjt+NSzDXUnf/XsYh8XnXsXGQBC8WQ==

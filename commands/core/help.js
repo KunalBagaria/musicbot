@@ -13,6 +13,7 @@ module.exports = {
                 embed: {
                     color: 'ORANGE',
                     author: { name: 'Help pannel' },
+                    footer: { text: 'This bot uses a Github project made by Zerio (ZerioDev/Music-bot)' },
                     fields: [
                         { name: 'Bot', value: infos },
                         { name: 'Music', value: music },
@@ -30,7 +31,6 @@ module.exports = {
             message.channel.send({
                 embed: {
                     color: 'ORANGE',
-                    footer: { text: 'This bot uses a Github project made by Zerio (ZerioDev/Music-bot)' },
                     author: { name: 'Help pannel' },
                     footer: { text: 'This bot uses a Github project made by Zerio (ZerioDev/Music-bot)' },
                     fields: [
