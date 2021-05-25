@@ -1,15 +1,15 @@
 const fs = require('fs');
 const discord = require('discord.js');
 
-const client = new discord.Client({ disableMentions: 'everyone' });
+const client = new discord.Client({ 
+    disableMentions: 'everyone',
+    leaveOnEnd: false,
+    leaveOnEmpty: false
+});
 
 const { Player } = require('discord-player');
 
-client.player = new Player(client, {
-    leaveOnEmpty: false,
-    leaveOnStop: false,
-    leaveOnEmpty: false,
-});
+client.player = new Player(client);
 client.config = require('./config/bot');
 client.emotes = client.config.emojis;
 client.filters = client.config.filters;
