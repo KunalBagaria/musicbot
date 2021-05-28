@@ -1,5 +1,4 @@
 import Discord from 'discord.js'
-import Countdown from 'countdown-js'
 
 const client = new Discord.Client()
 const trigger = '$'
