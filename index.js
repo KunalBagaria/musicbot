@@ -14,18 +14,17 @@ client.on('message', async (message) => {
         if (command.includes('play') && message.member.voice.channel) {
             let toPlayUrl = message.content.split('play ')[1]
             if (toPlayUrl) {
-                const connection = await message.member.voice.channel.join();
-                let dispatcher
-                const playSong = () => {
-                    dispatcher = connection.play(toPlayUrl)   
+                const playSong = async () => {
+                    const connection = await message.member.voice.channel.join();
+                    const dispatcher = connection.play(toPlayUrl)
+                    dispatcher.on('start', () => {
+                        console.log(toPlayUrl, 'is now playing!');
+                    })
+                    dispatcher.on('finish', () => {
+                        playSong()
+                    })
                 }
                 playSong()
-                dispatcher.on('start', () => {
-                    console.log(toPlayUrl, 'is now playing!');
-                })
-                dispatcher.on('finish', () => {
-                    playSong()
-                })
             } else {
                 message.channel.send(`Indicate the URL of a song to play (YouTube links won't work)`)
             }
