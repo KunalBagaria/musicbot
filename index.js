@@ -16,7 +16,7 @@ client.on('message', async (message) => {
             if (toPlayUrl) {
                 const playSong = async () => {
                     const connection = await message.member.voice.channel.join();
-                    const dispatcher = connection.play(toPlayUrl)
+                    const dispatcher = connection.play(toPlayUrl, { highWaterMark: 240 })
                     dispatcher.on('start', () => {
                         console.log(toPlayUrl, 'is now playing!');
                     })
