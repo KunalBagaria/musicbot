@@ -1,44 +1,41 @@
-const fs = require('fs');
-const Discord = require('discord.js');
+import Discord from 'discord.js'
+import Countdown from 'countdown-js'
 
-const client = new Discord.Client();
+const client = new Discord.Client()
+const trigger = '$'
 
-const { Player } = require('discord-player');
+client.on('ready', () => {
+    console.log("I'm ready")
+})
 
-client.player = new Player(client, { 
-    leaveOnEnd: false,
-    leaveOnStop: false,
-    leaveOnEmpty: false,
-    enableLive: true
-});
-client.config = require('./config/bot');
-client.emotes = client.config.emojis;
-client.filters = client.config.filters;
-client.commands = new Discord.Collection();
+client.on('message', async (message) => {
+    if (message.author.bot) return
+    if (message.content.startsWith(trigger)) {
+        let command = message.content.split(trigger)[1].toLowerCase()
+        if (command.includes('play') && message.member.voice.channel) {
+            let toPlayUrl = message.content.split('play ')[1]
+            if (toPlayUrl) {
+                const connection = await message.member.voice.channel.join();
+                let dispatcher
+                const playSong = () => {
+                    dispatcher = connection.play(toPlayUrl)   
+                }
+                playSong()
+                dispatcher.on('start', () => {
+                    console.log(toPlayUrl, 'is now playing!');
+                })
+                dispatcher.on('finish', () => {
+                    playSong()
+                })
+            } else {
+                message.channel.send(`Indicate the URL of a song to play (YouTube links won't work)`)
+            }
+        } else if (command.includes('stop') && message.member.voice.channel) {
+            const connection = await message.member.voice.channel.leave();
+        } else {
+            message.channel.send('You are not in a voice channel!')
+        }
+    }
+})
 
-fs.readdirSync('./commands').forEach(dirs => {
-    const commands = fs.readdirSync(`./commands/${dirs}`).filter(files => files.endsWith('.js'));
-
-    for (const file of commands) {
-        const command = require(`./commands/${dirs}/${file}`);
-        console.log(`Loading command ${file}`);
-        client.commands.set(command.name.toLowerCase(), command);
-    };
-});
-
-const events = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
-const player = fs.readdirSync('./player').filter(file => file.endsWith('.js'));
-
-for (const file of events) {
-    console.log(`Loading discord.js event ${file}`);
-    const event = require(`./events/${file}`);
-    client.on(file.split(".")[0], event.bind(null, client));
-};
-
-for (const file of player) {
-    console.log(`Loading discord-player event ${file}`);
-    const event = require(`./player/${file}`);
-    client.player.on(file.split(".")[0], event.bind(null, client));
-};
-
-client.login(client.config.discord.token);
+client.login("ODAyNTEwNTY1NDQ3ODI3NDk3.YAwSNA.o1-uxAdVKCmTD2YopImCbSxrwlk")
