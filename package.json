@@ -1,12 +1,17 @@
 {
-  "name": "wwdc-community-bot",
+  "name": "musicbot",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "@discordjs/opus": "^0.5.0",
-    "discord.js": "^12.5.3",
-    "ffmpeg-static": "^4.3.0"
+    "bufferutil": "^4.0.3",
+    "discord.js": "^13.0.0-dev.086c3f0799d65c64c4e60d6370246a37a27a1eab",
+    "erlpack": "discord/erlpack",
+    "ffmpeg-static": "^4.3.0",
+    "libsodium-wrappers": "^0.7.9",
+    "utf-8-validate": "^5.0.5",
+    "zlib-sync": "^0.1.7"
   },
   "type": "module"
 }
