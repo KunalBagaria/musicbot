@@ -11,15 +11,20 @@ client.on('message', async (message) => {
     let messageContent = message.content
     if (messageContent.includes('$play')){
         let musicLink = messageContent.split('$play ')[1]
-        const channel = await client.channels.cache.get("849567857520017429");
-        const connection = await channel.join()
+        const broadcast = await client.voice.createBroadcast();
         const playSong = async () => {
-            const dispatcher = await connection.play(musicLink, { highWaterMark: 2048 })
+            const dispatcher = await broadcast.play(musicLink)
             dispatcher.on('finish', () => {
                 playSong()
             })
         }
-        setTimeout(playSong, 10000)
+        playSong()
+        const channelOne = await client.channels.cache.get("849567857520017429");
+        const channelTwo = await client.channels.cache.get("851009827207512084");
+        const connectionOne = await channelOne.join()
+        const connectionTwo = await channelTwo.join()
+        await connectionOne.play(broadcast, { highWaterMark: 10000 });
+        await connectionTwo.play(broadcast, { highWaterMark: 10000 });
     }
 })
 
