@@ -23,8 +23,7 @@ client.on('message', async (message) => {
                 setTimeout(() => message.channel.stopTyping(), 10000)
                 const connection = await message.member.voice.channel.join();
                 const args = message.content.split(' ').slice(1)
-                const randomNum = () => Math.floor(Math.random() * (7000 - 4000) + 4000)
-                const dispatcher = connection.play(ytdl(args.join(" ")), { highWaterMark: randomNum() })
+                const dispatcher = connection.play(ytdl(args.join(" ")))
                 dispatcher.on('start', () => getVideoInfo(args.join(" "), message))
                 dispatcher.on('finish', () => playMusic())
             } catch (e) {
