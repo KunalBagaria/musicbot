@@ -16,7 +16,7 @@ const helpEmbed = () => {
                 value: 'Stops playing in your server'
             }
         )
-        .footer('This musicbot is made my Kunal Bagaria ● https://github.com/kb24x7/musicbot')
+        .setFooter('This musicbot is made by Kunal Bagaria ● https://github.com/kb24x7/musicbot')
     return embed
 }
 

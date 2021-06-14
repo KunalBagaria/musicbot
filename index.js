@@ -20,6 +20,7 @@ client.on('message', async (message) => {
         const playMusic = async () => {
             try {
                 message.channel.startTyping(true)
+                setTimeout(() => message.channel.startTyping(false))
                 const connection = await message.member.voice.channel.join();
                 const args = message.content.split(' ').slice(1)
                 const randomNum = () => Math.floor(Math.random() * (7000 - 4000) + 4000)
