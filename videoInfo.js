@@ -14,6 +14,7 @@ const getVideoInfo = async (url, message) => {
         .setTitle(`${isLive ? '🛑' : ''} Now playing${isLive ? '' : ' on infinite loop'}:`)
         .setDescription(title)
         .setURL(url)
+        .footer('This musicbot is made my Kunal Bagaria ● https://github.com/kb24x7/musicbot')
 
     message.reply(videoEmbed)
     message.channel.stopTyping(true)
