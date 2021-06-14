@@ -4,6 +4,7 @@
 To start the music bot:
 1. Make a new file `.env` with the bot token format as: `TOKEN=YOUR_TOKEN_HERE`
 2. Run `yarn`, if you don't have yarn, install it using `npm -g install yarn`
+3. Run `node index.js` to start the bot
 
 #### Commands:
 1. $help: Shows all the commands
