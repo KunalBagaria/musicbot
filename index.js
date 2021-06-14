@@ -4,8 +4,6 @@ import getVideoInfo from './videoInfo.js'
 import helpEmbed from './help.js'
 import dotenv from 'dotenv'
 
-dotenv.config()
-
 const client = new Discord.Client()
 
 client.on('ready', async () => {
@@ -53,5 +51,10 @@ client.on('message', async (message) => {
     }
 })
 
+const envFile = dotenv.config()
 
-client.login(process.env.TOKEN)
+if (envFile.TOKEN) {
+    client.login(envFile.TOKEN)
+} else {
+    client.login(process.env.TOKEN)
+}
