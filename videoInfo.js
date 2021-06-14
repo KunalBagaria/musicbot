@@ -17,7 +17,7 @@ const getVideoInfo = async (url, message) => {
         .setFooter('This musicbot is made by Kunal Bagaria ● https://github.com/kb24x7/musicbot')
 
     message.reply(videoEmbed)
-    message.channel.stopTyping(true)
+    message.channel.stopTyping()
 }
 
 export default getVideoInfo
