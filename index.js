@@ -1,31 +1,50 @@
-import { Client, Intents } from 'discord.js'
+import Discord from 'discord.js'
+import ytdl from 'ytdl-core'
+import getVideoInfo from './videoInfo.js'
+import dotenv from 'dotenv'
 
-const client = new Client({ intents: [Intents.ALL] });
+dotenv.config() // Comment this on production for services like Heroku, etc.
+
+const client = new Discord.Client()
 
 client.on('ready', async () => {
     console.log("I'm ready")
 })
 
 client.on('message', async (message) => {
-    if (message.author.bot) return
-    let messageContent = message.content
-    if (messageContent.includes('$play')){
-        let musicLink = messageContent.split('$play ')[1]
-        const broadcast = await client.voice.createBroadcast();
-        const playSong = async () => {
-            const dispatcher = await broadcast.play(musicLink)
-            dispatcher.on('finish', () => {
-                playSong()
-            })
+    let messageContent = message.content.toLowerCase()
+    if (message.author.bot || !message.member.voice.channel) return
+    if (messageContent.startsWith('$play')) {
+        const playMusic = async () => {
+            try {
+                const connection = await message.member.voice.channel.join();
+                const args = message.content.split(' ').slice(1)
+                const randomNum = () => Math.floor(Math.random() * (7000 - 4000) + 4000)
+                const dispatcher = connection.play(ytdl(args.join(" ")), { highWaterMark: randomNum() })
+                dispatcher.on('start', () => getVideoInfo(args.join(" "), message))
+                dispatcher.on('finish', () => playMusic())
+                playMusic()
+            } catch (e) {
+                console.log(e)
+                playMusic()
+            }
         }
-        playSong()
-        const channelOne = await client.channels.cache.get("849567857520017429");
-        const channelTwo = await client.channels.cache.get("851009827207512084");
-        const connectionOne = await channelOne.join()
-        const connectionTwo = await channelTwo.join()
-        await connectionOne.play(broadcast, { highWaterMark: 10000 });
-        await connectionTwo.play(broadcast, { highWaterMark: 10000 });
+    } else if (messageContent.startsWith('$stop') || messageContent.startsWith('$leave')) {
+        try {
+            message.member.voice.channel.leave()
+            const leaveEmbed = new Discord.MessageEmbed()
+                .setTitle('Now leaving your Voice Channel')
+                .setColor('RANDOM')
+            message.reply(leaveEmbed)
+        } catch (e) {
+            console.log(e)
+            const leaveEmbed = new Discord.MessageEmbed()
+                .setTitle("There was an error, I don't think I'm in your voice channel.")
+                .setColor('RED')
+            message.reply(leaveEmbed)
+        }
     }
 })
 
-client.login("ODAyNTEwNTY1NDQ3ODI3NDk3.YAwSNA.o1-uxAdVKCmTD2YopImCbSxrwlk")
+
+client.login(process.env.TOKEN)
