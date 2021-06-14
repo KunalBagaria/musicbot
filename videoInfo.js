@@ -16,6 +16,7 @@ const getVideoInfo = async (url, message) => {
         .setURL(url)
 
     message.reply(videoEmbed)
+    message.channel.stopTyping(true)
 }
 
 export default getVideoInfo
