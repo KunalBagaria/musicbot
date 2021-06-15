@@ -2,6 +2,7 @@ import Discord from 'discord.js'
 import ytdl from 'ytdl-core'
 import getVideoInfo from './videoInfo.js'
 import helpEmbed from './help.js'
+import { searchInfo } from './search.js'
 import dotenv from 'dotenv'
 
 const client = new Discord.Client()
@@ -22,10 +23,18 @@ client.on('message', async (message) => {
                 message.channel.startTyping()
                 setTimeout(() => message.channel.stopTyping(), 10000)
                 const connection = await message.member.voice.channel.join();
-                const args = message.content.split(' ').slice(1)
-                const dispatcher = connection.play(ytdl(args.join(" ")))
-                dispatcher.on('start', () => getVideoInfo(args.join(" "), message))
-                dispatcher.on('finish', () => playMusic())
+                const args = message.content.split(' ').slice(1).join(" ")
+                const regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
+                if (regexp.test(args)) {
+                    const dispatcher = connection.play(ytdl(args))
+                    dispatcher.on('start', () => getVideoInfo(args, message))
+                    dispatcher.on('finish', () => playMusic())
+                } else {
+                    const url = await searchInfo(args)
+                    const dispatcher = connection.play(ytdl(url))
+                    dispatcher.on('start', () => getVideoInfo(url, message))
+                    dispatcher.on('finish', () => playMusic())
+                }
             } catch (e) {
                 console.log(e)
                 playMusic()

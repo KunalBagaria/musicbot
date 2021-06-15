@@ -8,8 +8,8 @@ const helpEmbed = () => {
         .setDescription("This bot will automatically loop your singleton links")
         .addFields(
             {
-                name: '➦ $play link',
-                value: 'Plays your YouTube URLs. Keyword support coming soon!'
+                name: '➦ $play link/search for video',
+                value: 'Plays your YouTube URLs or Keywords'
             },
             {
                 name: '➦ $stop',
