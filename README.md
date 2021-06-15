@@ -12,5 +12,5 @@ YOUTUBE=YOUR_YOUTUBE_API_KEY
 
 #### Commands:
 1. $help: Shows all the commands
-2. $play [url]: Plays a YouTube URL
+2. $play url/search for a video: Plays a YouTube video
 3. $stop / $leave: Stops playing music in your server
