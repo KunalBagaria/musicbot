@@ -1,6 +1,8 @@
 # Musicbot
 24x7 Radio music bot for Discord
 
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https%3A%2F%2Fgithub.com%2Fkb24x7%2Fmusicbot&envs=TOKEN&TOKENDesc=Your+Bot+Token)
+
 To start the music bot:
 1. Make a new file `.env` with the bot token format as: 
 ```
