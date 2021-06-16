@@ -2,7 +2,8 @@ import Discord from 'discord.js'
 import ytdl from 'ytdl-core'
 import getVideoInfo from './videoInfo.js'
 import helpEmbed from './help.js'
-import { searchInfo } from './search.js'
+import searchInfo from './search.js'
+import trending from './trending.js'
 import dotenv from 'dotenv'
 
 const client = new Discord.Client()
@@ -30,9 +31,8 @@ client.on('message', async (message) => {
                     dispatcher.on('start', () => getVideoInfo(args, message))
                     dispatcher.on('finish', () => playMusic())
                 } else {
-                    const url = await searchInfo(args)
+                    const url = await searchInfo(args, message)
                     const dispatcher = connection.play(ytdl(url))
-                    dispatcher.on('start', () => getVideoInfo(url, message))
                     dispatcher.on('finish', () => playMusic())
                 }
             } catch (e) {
@@ -57,6 +57,16 @@ client.on('message', async (message) => {
         }
     } else if (messageContent === '$help') {
         message.reply(helpEmbed())
+    } else if (messageContent === '$trending' && message.member.voice.channel) {
+        try {
+            message.channel.startTyping()
+            setTimeout(() => message.channel.stopTyping(), 10000)
+            const connection = await message.member.voice.channel.join()
+            const url = await trending(message)
+            const dispatcher = connection.play(ytdl(url))
+        } catch (e) {
+            console.log(e)
+        }
     }
 })
 

@@ -1,15 +1,15 @@
-import Discord from 'discord.js'
 import { YouTube } from 'youtube-sr'
+import Discord from 'discord.js'
 
-const searchInfo = async (args, message) => {
-    const search = await YouTube.search(args, { limit: 1 })
-    const video = search[0]
+const trending = async (message) => {
+    const details = await YouTube.homepage()
+    const video = await details[Math.floor(Math.random() * details.length)]
     if (video) {
         const title = video.title
         const thumbnail = video.thumbnail.url
         const embed = new Discord.MessageEmbed()
             .setColor('RANDOM')
-            .setTitle('Now Playing on an infinite loop')
+            .setTitle('Now Playing:')
             .setDescription(title)
             .setImage(thumbnail)
         message.reply(embed)
@@ -17,7 +17,7 @@ const searchInfo = async (args, message) => {
     } else {
         const notFoundEmbed = new Discord.MessageEmbed()
             .setColor('RANDOM')
-            .setTitle('No results found for this video')
+            .setTitle('No results found for trending videos')
         message.reply(notFoundEmbed)
         message.channel.stopTyping()
     }
@@ -25,4 +25,4 @@ const searchInfo = async (args, message) => {
     return url
 }
 
-export default searchInfo
+export default trending

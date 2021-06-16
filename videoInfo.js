@@ -11,7 +11,7 @@ const getVideoInfo = async (url, message) => {
     const videoEmbed = new Discord.MessageEmbed()
         .setColor('RANDOM')
         .setImage(thumbnail)
-        .setTitle(`${isLive ? '🛑' : ''} Now playing${isLive ? '' : ' on infinite loop'}:`)
+        .setTitle(`${isLive ? '🛑' : ''} Now playing${isLive ? '' : ' on an infinite loop'}:`)
         .setDescription(title)
         .setURL(url)
         .setFooter('This musicbot is made by Kunal Bagaria ● https://github.com/kb24x7/musicbot')

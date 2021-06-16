@@ -14,7 +14,11 @@ const helpEmbed = () => {
             {
                 name: '➦ $stop',
                 value: 'Stops playing in your server'
-            }
+            },
+            {
+                name: '➦ $trending',
+                value: 'Plays a top trending video from YouTube'
+            },
         )
         .setFooter('This musicbot is made by Kunal Bagaria ● https://github.com/kb24x7/musicbot')
     return embed
