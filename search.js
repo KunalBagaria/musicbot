@@ -1,10 +1,10 @@
 import Discord from 'discord.js'
 import { YouTube } from 'youtube-sr'
 
-const searchInfo = async (args, message) => {
+const searchInfo = async (args, message, reply) => {
     const search = await YouTube.search(args, { limit: 1 })
     const video = search[0]
-    if (video) {
+    if (video && reply) {
         const title = video.title
         const thumbnail = video.thumbnail.url
         const embed = new Discord.MessageEmbed()
@@ -14,7 +14,7 @@ const searchInfo = async (args, message) => {
             .setImage(thumbnail)
         message.reply(embed)
         message.channel.stopTyping()
-    } else {
+    } else if (!video) {
         const notFoundEmbed = new Discord.MessageEmbed()
             .setColor('RANDOM')
             .setTitle('No results found for this video')

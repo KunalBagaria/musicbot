@@ -1,7 +1,17 @@
+import Discord from 'discord.js'
 import ytdl from 'ytdl-core'
 
-const getInfo = async (args) => {
+
+const getInfo = async (args, message) => {
     const info = await ytdl.getInfo(args)
+    if (info.videoDetails.isLive) {
+        const liveEmbed = new Discord.MessageEmbed()
+            .setColor('RANDOM')
+            .setTitle('Sorry, Live videos are not supported yet.')
+        if (message) {
+            message.reply(liveEmbed)
+        }
+    }
     const formats = info.formats
     const audios = []
     formats.forEach((format) => {

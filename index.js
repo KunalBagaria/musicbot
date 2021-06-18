@@ -5,6 +5,7 @@ import searchInfo from './search.js'
 import trending from './trending.js'
 import dotenv from 'dotenv'
 import getInfo from './getUrl.js'
+import fs from 'fs'
 
 const client = new Discord.Client()
 
@@ -15,48 +16,100 @@ client.on('ready', async () => {
     })
 })
 
+const randomTimeGen = () => {
+    return Math.floor(Math.random() * (15000 - 3000) + 3000)
+}
+
+const executeLoop = async (play) => {
+    const connections = await client.voice.connections
+    const connectionIds = []
+    connections.forEach((connection) => {
+        connectionIds.push(connection.channel.id)
+    })
+    fs.readdir('./json', (err, files) => {
+        files.forEach(guildId => {
+          if (guildId.match(".json$", "i")) {
+            fs.readFile(`./json/${guildId}`, async (err, data) => {
+                if (err) throw err;
+                const guildData = JSON.parse(data);
+                const channel = await client.channels.cache.get(guildData.channel)
+                if (!connectionIds.includes(channel.id)) {
+                    console.log(channel.id)
+                    play(guildData.url, channel, false)
+                }
+            })
+          }
+        })
+        if (err) throw err
+    })
+}
+
 client.on('message', async (message) => {
     let messageContent = message.content.toLowerCase()
     if (message.author.bot) return
     if (messageContent.startsWith('$play') && message.member.voice.channel) {
+
         const playMusic = async () => {
             try {
                 message.channel.startTyping()
                 setTimeout(() => message.channel.stopTyping(), 10000)
-                const connection = await message.member.voice.channel.join();
                 const args = message.content.split(' ').slice(1).join(" ")
-                const regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
+                const regexp = /(?:.+?)?(?:\/v\/|watch\/|\?v=|\&v=|youtu\.be\/|\/v=|^youtu\.be\/)([a-zA-Z0-9_-]{11})+/;
+                
                 if (regexp.test(args)) {
-                    const audio = await getInfo(args)
-                    const dispatcher = connection.play(audio, {
-                        bitrate: 128000
-                    })
-                    dispatcher.on('start', () => getVideoInfo(args, message))
-                    dispatcher.on('finish', () => {
-                        setTimeout(() => {
-                            message.member.voice.channel.leave()
-                            playMusic()
-                        }, Math.floor(Math.random() * 15))
-                    })
+                    const executeURL = async (argument, execChannel, reply) => {
+                        const audio = await getInfo(argument, message)
+                        if (audio) {
+                            const channel = execChannel ? execChannel : message.member.voice.channel
+                            const connection = await channel.join();
+                            const dispatcher = connection.play(audio, {
+                                bitrate: 128000
+                            })
+                            dispatcher.on('start', () => getVideoInfo(args, message, reply))
+                            dispatcher.on('finish', () => {
+                                message.member.voice.channel.leave()
+                                setTimeout(() => {
+                                    executeLoop(executeURL)
+                                }, randomTimeGen())
+                            })
+                        }
+                    }
+                    executeURL(args, message.member.voice.channel, true)
+                    fs.writeFileSync(`./json/${message.guild.id}.json`, JSON.stringify({
+                        channel: message.member.voice.channel.id,
+                        url: args
+                    }))
                 } else {
-                    const url = await searchInfo(args, message)
-                    const audio = await getInfo(url)
-                    const dispatcher = connection.play(audio, {
-                        bitrate: 128000
-                    })
-                    dispatcher.on('finish', () => {
-                        message.member.voice.channel.leave()
-                        setTimeout(() => {
-                            playMusic()
-                        }, Math.floor(Math.random() * 15))
-                    })
+                    const url = await searchInfo(args, message, true)
+                    const executeURL = async (argument, execChannel, reply) => {
+                        const audio = await getInfo(argument, message)
+                        if (audio) {
+                            const channel = execChannel ? execChannel : message.member.voice.channel
+                            const connection = await channel.join();
+                            const dispatcher = connection.play(audio, {
+                                bitrate: 128000
+                            })
+                            dispatcher.on('finish', () => {
+                                message.member.voice.channel.leave()
+                                setTimeout(() => {
+                                    executeLoop(executeURL)
+                                }, randomTimeGen())
+                            })
+                        }
+                    }
+                    executeURL(url, message.member.voice.channel)
+                    fs.writeFileSync(`./json/${message.guild.id}.json`, JSON.stringify({
+                        channel: message.member.voice.channel.id,
+                        url: url
+                    }))
                 }
             } catch (e) {
                 console.log(e)
-                playMusic()
             }
         }
+
         playMusic()
+
     } else if ((messageContent.startsWith('$stop') || messageContent.startsWith('$leave')) && message.member.voice.channel) {
         try {
             message.member.voice.channel.leave()
@@ -79,13 +132,15 @@ client.on('message', async (message) => {
             setTimeout(() => message.channel.stopTyping(), 10000)
             const connection = await message.member.voice.channel.join()
             const url = await trending(message)
-            const audio = await getInfo(url)
-            const dispatcher = connection.play(audio, {
-                bitrate: 128000
-            })
-            dispatcher.on('finish', () => {
-                message.member.voice.channel.leave()
-            })
+            const audio = await getInfo(url, message)
+            if (audio) {
+                const dispatcher = connection.play(audio, {
+                    bitrate: 128000
+                })
+                dispatcher.on('finish', () => {
+                    message.member.voice.channel.leave()
+                })
+            }
         } catch (e) {
             console.log(e)
         }
