@@ -27,13 +27,25 @@ client.on('message', async (message) => {
                 const args = message.content.split(' ').slice(1).join(" ")
                 const regexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
                 if (regexp.test(args)) {
-                    const dispatcher = connection.play(ytdl(args, { highWaterMark: 1 << 25 }), { bitrate: 128000 })
+                    const dispatcher = connection.play(await ytdl(args, {
+                        filter: 'audioonly',
+                        quality: 'highestaudio',
+                        highWaterMark: 1 << 25
+                    }), { bitrate: 128000, type: 'opus' })
                     dispatcher.on('start', () => getVideoInfo(args, message))
-                    dispatcher.on('finish', () => playMusic())
+                    dispatcher.on('finish', () => {
+                        setTimeout(() => {
+                            playMusic()
+                        }, Math.floor(Math.random() * 15))
+                    })
                 } else {
                     const url = await searchInfo(args, message)
                     const dispatcher = connection.play(ytdl(url))
-                    dispatcher.on('finish', () => playMusic())
+                    dispatcher.on('finish', () => {
+                        setTimeout(() => {
+                            playMusic()
+                        }, Math.floor(Math.random() * 15))
+                    })
                 }
             } catch (e) {
                 console.log(e)
@@ -63,7 +75,11 @@ client.on('message', async (message) => {
             setTimeout(() => message.channel.stopTyping(), 10000)
             const connection = await message.member.voice.channel.join()
             const url = await trending(message)
-            const dispatcher = connection.play(ytdl(url, { highWaterMark: 1 << 25 }), { bitrate: 128000 })
+            const dispatcher = connection.play(await ytdl(url, {
+                filter: 'audioonly',
+                quality: 'highestaudio',
+                highWaterMark: 1 << 25
+            }), { bitrate: 128000, type: 'opus' })
         } catch (e) {
             console.log(e)
         }
@@ -77,3 +93,7 @@ if (envFile.TOKEN) {
 } else {
     client.login(process.env.TOKEN)
 }
+
+process.on('uncaughtException', (err) => {
+    console.error('There was an uncaught error', err)
+})
