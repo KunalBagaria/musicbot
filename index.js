@@ -40,7 +40,11 @@ client.on('message', async (message) => {
                     })
                 } else {
                     const url = await searchInfo(args, message)
-                    const dispatcher = connection.play(ytdl(url))
+                    const dispatcher = connection.play(await ytdl(url, {
+                        filter: 'audioonly',
+                        quality: 'highestaudio',
+                        highWaterMark: 1 << 25
+                    }), { bitrate: 128000, type: 'opus' })
                     dispatcher.on('finish', () => {
                         setTimeout(() => {
                             playMusic()
