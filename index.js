@@ -21,25 +21,27 @@ const randomTimeGen = () => {
 }
 
 const executeLoop = async (play) => {
-    const connections = await client.voice.connections
-    const connectionIds = []
-    connections.forEach((connection) => {
-        connectionIds.push(connection.channel.id)
-    })
     fs.readdir('./json', (err, files) => {
-        files.forEach(guildId => {
-          if (guildId.match(".json$", "i")) {
-            fs.readFile(`./json/${guildId}`, async (err, data) => {
-                if (err) throw err;
-                const guildData = JSON.parse(data);
-                const channel = await client.channels.cache.get(guildData.channel)
-                if (!connectionIds.includes(channel.id)) {
-                    console.log(channel.id)
-                    play(guildData.url, channel, false)
+        if (files[0]) {
+            files.forEach(guildId => {
+                if (guildId.match(".json$", "i")) {
+                    fs.readFile(`./json/${guildId}`, async (err, data) => {
+                        if (err) throw err;
+                        const guildData = JSON.parse(data);
+                        const channel = await client.channels.cache.get(guildData.channel)
+                        channel.leave()
+                        const connections = await client.voice.connections
+                        const connectionIds = []
+                        connections.forEach((connection) => {
+                            connectionIds.push(connection.channel.id)
+                        })
+                        if (!connectionIds.includes(channel.id)) {
+                            play(guildData.url, channel, false, channel.bitrate)
+                        }
+                    })
                 }
             })
-          }
-        })
+        }
         if (err) throw err
     })
 }
@@ -55,19 +57,18 @@ client.on('message', async (message) => {
                 setTimeout(() => message.channel.stopTyping(), 10000)
                 const args = message.content.split(' ').slice(1).join(" ")
                 const regexp = /(?:.+?)?(?:\/v\/|watch\/|\?v=|\&v=|youtu\.be\/|\/v=|^youtu\.be\/)([a-zA-Z0-9_-]{11})+/;
-                
+
                 if (regexp.test(args)) {
-                    const executeURL = async (argument, execChannel, reply) => {
+                    const executeURL = async (argument, execChannel, reply, bit) => {
                         const audio = await getInfo(argument, message)
                         if (audio) {
                             const channel = execChannel ? execChannel : message.member.voice.channel
                             const connection = await channel.join();
                             const dispatcher = connection.play(audio, {
-                                bitrate: 128000
+                                bitrate: message.member.voice.channel.bitrate ? message.member.voice.channel.bitrate : bit
                             })
                             dispatcher.on('start', () => getVideoInfo(args, message, reply))
                             dispatcher.on('finish', () => {
-                                message.member.voice.channel.leave()
                                 setTimeout(() => {
                                     executeLoop(executeURL)
                                 }, randomTimeGen())
@@ -81,16 +82,15 @@ client.on('message', async (message) => {
                     }))
                 } else {
                     const url = await searchInfo(args, message, true)
-                    const executeURL = async (argument, execChannel, reply) => {
+                    const executeURL = async (argument, execChannel, reply, bit) => {
                         const audio = await getInfo(argument, message)
                         if (audio) {
                             const channel = execChannel ? execChannel : message.member.voice.channel
                             const connection = await channel.join();
                             const dispatcher = connection.play(audio, {
-                                bitrate: 128000
+                                bitrate: message.member.voice.channel.bitrate ? message.member.voice.channel.bitrate : bit
                             })
                             dispatcher.on('finish', () => {
-                                message.member.voice.channel.leave()
                                 setTimeout(() => {
                                     executeLoop(executeURL)
                                 }, randomTimeGen())
@@ -135,7 +135,7 @@ client.on('message', async (message) => {
             const audio = await getInfo(url, message)
             if (audio) {
                 const dispatcher = connection.play(audio, {
-                    bitrate: 128000
+                    bitrate: message.member.voice.channel.bitrate
                 })
                 dispatcher.on('finish', () => {
                     message.member.voice.channel.leave()
