@@ -5,7 +5,6 @@ import searchInfo from './search.js'
 import trending from './trending.js'
 import dotenv from 'dotenv'
 import getInfo from './getUrl.js'
-import fs from 'fs'
 
 const client = new Discord.Client()
 
@@ -20,32 +19,6 @@ const randomTimeGen = () => {
     return Math.floor(Math.random() * (15000 - 3000) + 3000)
 }
 
-const executeLoop = async (play) => {
-    fs.readdir('./json', (err, files) => {
-        if (files[0]) {
-            files.forEach(guildId => {
-                if (guildId.match(".json$", "i")) {
-                    fs.readFile(`./json/${guildId}`, async (err, data) => {
-                        if (err) throw err;
-                        const guildData = JSON.parse(data);
-                        const channel = await client.channels.cache.get(guildData.channel)
-                        const connections = await client.voice.connections
-                        const connectionIds = []
-                        connections.forEach((connection) => {
-                            connectionIds.push(connection.channel.id)
-                        })
-                        if (!connectionIds.includes(channel.id)) {
-                            channel.leave()
-                            play(guildData.url, channel, false)
-                        }
-                    })
-                }
-            })
-        }
-        if (err) throw err
-    })
-}
-
 client.on('message', async (message) => {
     let messageContent = message.content.toLowerCase()
     if (message.author.bot) return
@@ -53,57 +26,50 @@ client.on('message', async (message) => {
 
         const playMusic = async () => {
             try {
+
                 message.channel.startTyping()
                 setTimeout(() => message.channel.stopTyping(), 10000)
+
                 const args = message.content.split(' ').slice(1).join(" ")
                 const regexp = /(?:.+?)?(?:\/v\/|watch\/|\?v=|\&v=|youtu\.be\/|\/v=|^youtu\.be\/)([a-zA-Z0-9_-]{11})+/;
 
+                const channel = message.member.voice.channel
+                const connection = await channel.join();
+                const bitrate = message.member.voice.channel.bitrate
+                const myMessage = message
+                
                 if (regexp.test(args)) {
-                    const executeURL = async (argument, execChannel, reply) => {
-                        const audio = await getInfo(argument, message)
+                    const playMyMusic = async (reply) => {
+                        const audio = await getInfo(args, myMessage)
                         if (audio) {
-                            const channel = execChannel ? execChannel : message.member.voice.channel
-                            const connection = await channel.join();
                             const dispatcher = connection.play(audio, {
-                                bitrate: 128000,
-                                highWaterMark: 500
+                                bitrate: bitrate
                             })
-                            dispatcher.on('start', () => getVideoInfo(args, message, reply))
+                            dispatcher.on('start', () => getVideoInfo(args, myMessage, reply))
                             dispatcher.on('finish', () => {
                                 setTimeout(() => {
-                                    executeLoop(executeURL)
+                                    playMyMusic(false)
                                 }, randomTimeGen())
                             })
                         }
                     }
-                    executeURL(args, message.member.voice.channel, true)
-                    fs.writeFileSync(`./json/${message.guild.id}.json`, JSON.stringify({
-                        channel: message.member.voice.channel.id,
-                        url: args
-                    }))
+                    playMyMusic(true)
                 } else {
                     const url = await searchInfo(args, message, true)
-                    const executeURL = async (argument, execChannel, reply) => {
-                        const audio = await getInfo(argument, message)
+                    const playMyAudio = async () => {
+                        const audio = await getInfo(url, myMessage)
                         if (audio) {
-                            const channel = execChannel ? execChannel : message.member.voice.channel
-                            const connection = await channel.join();
                             const dispatcher = connection.play(audio, {
-                                bitrate: 128000,
-                                highWaterMark: 500
+                                bitrate: bitrate
                             })
                             dispatcher.on('finish', () => {
                                 setTimeout(() => {
-                                    executeLoop(executeURL)
+                                    playMyAudio()
                                 }, randomTimeGen())
                             })
                         }
                     }
-                    executeURL(url, message.member.voice.channel)
-                    fs.writeFileSync(`./json/${message.guild.id}.json`, JSON.stringify({
-                        channel: message.member.voice.channel.id,
-                        url: url
-                    }))
+                    playMyAudio()
                 }
             } catch (e) {
                 console.log(e)

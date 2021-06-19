@@ -1,7 +1,6 @@
 import Discord from 'discord.js'
 import ytdl from 'ytdl-core'
 
-
 const getInfo = async (args, message) => {
     const info = await ytdl.getInfo(args)
     if (info.videoDetails.isLive) {
@@ -30,7 +29,5 @@ const getInfo = async (args, message) => {
     }
     return url
 }
-
-getInfo()
 
 export default getInfo
