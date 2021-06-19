@@ -36,7 +36,7 @@ const executeLoop = async (play) => {
                             connectionIds.push(connection.channel.id)
                         })
                         if (!connectionIds.includes(channel.id)) {
-                            play(guildData.url, channel, false, channel.bitrate)
+                            play(guildData.url, channel, false, 128000)
                         }
                     })
                 }
