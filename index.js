@@ -29,13 +29,13 @@ const executeLoop = async (play) => {
                         if (err) throw err;
                         const guildData = JSON.parse(data);
                         const channel = await client.channels.cache.get(guildData.channel)
-                        channel.leave()
                         const connections = await client.voice.connections
                         const connectionIds = []
                         connections.forEach((connection) => {
                             connectionIds.push(connection.channel.id)
                         })
                         if (!connectionIds.includes(channel.id)) {
+                            channel.leave()
                             play(guildData.url, channel, false, 128000)
                         }
                     })
