@@ -13,14 +13,24 @@ const getInfo = async (args, message) => {
         }
     }
     const formats = info.formats
-    const audios = []
+    const audioFormats = []
+    let url = ''
     formats.forEach((format) => {
-        if (!format.hasVideo && format.container === 'webm') {
-            audios.push(format.url)
+        if (!format.hasVideo && format.container !== 'mp4') {
+            audioFormats.push(format)
         }
     })
-    const url = audios[0] ? audios[0] : ''
+    audioFormats.forEach((format) => {
+        if (format.audioBitrate > 100) {
+            url = format.url
+        }
+    })
+    if (!url) {
+        url = audioFormats[0].url
+    }
     return url
 }
+
+getInfo()
 
 export default getInfo
