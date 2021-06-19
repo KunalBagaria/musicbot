@@ -65,7 +65,8 @@ client.on('message', async (message) => {
                             const channel = execChannel ? execChannel : message.member.voice.channel
                             const connection = await channel.join();
                             const dispatcher = connection.play(audio, {
-                                bitrate: 128000
+                                bitrate: 128000,
+                                highWaterMark: 500
                             })
                             dispatcher.on('start', () => getVideoInfo(args, message, reply))
                             dispatcher.on('finish', () => {
@@ -88,7 +89,8 @@ client.on('message', async (message) => {
                             const channel = execChannel ? execChannel : message.member.voice.channel
                             const connection = await channel.join();
                             const dispatcher = connection.play(audio, {
-                                bitrate: 128000
+                                bitrate: 128000,
+                                highWaterMark: 500
                             })
                             dispatcher.on('finish', () => {
                                 setTimeout(() => {
