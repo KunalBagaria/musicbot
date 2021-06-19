@@ -4,7 +4,7 @@ import helpEmbed from './help.js'
 import searchInfo from './search.js'
 import trending from './trending.js'
 import dotenv from 'dotenv'
-import ytdl from 'ytdl-core'
+import getInfo from './getUrl.js'
 
 const client = new Discord.Client()
 
@@ -37,39 +37,37 @@ client.on('message', async (message) => {
                 const connection = await channel.join();
                 const bitrate = message.member.voice.channel.bitrate
                 const myMessage = message
-
+                
                 if (regexp.test(args)) {
                     const playMyMusic = async (reply) => {
-                        const dispatcher = connection.play(await ytdl(args, {
-                            filter: 'audioonly',
-                            quality: 'highestaudio',
-                            highWaterMark: 1 << 25
-                        }), {
-                            bitrate: bitrate
-                        })
-                        dispatcher.on('start', () => getVideoInfo(args, myMessage, reply))
-                        dispatcher.on('finish', () => {
-                            setTimeout(() => {
-                                playMyMusic(false)
-                            }, randomTimeGen())
-                        })
+                        const audio = await getInfo(args, myMessage)
+                        if (audio) {
+                            const dispatcher = connection.play(audio, {
+                                bitrate: bitrate
+                            })
+                            dispatcher.on('start', () => getVideoInfo(args, myMessage, reply))
+                            dispatcher.on('finish', () => {
+                                setTimeout(() => {
+                                    playMyMusic(false)
+                                }, randomTimeGen())
+                            })
+                        }
                     }
                     playMyMusic(true)
                 } else {
                     const url = await searchInfo(args, message, true)
                     const playMyAudio = async () => {
-                        const dispatcher = connection.play(await ytdl(url, {
-                            filter: 'audioonly',
-                            quality: 'highestaudio',
-                            highWaterMark: 1 << 25
-                        }), {
-                            bitrate: bitrate
-                        })
-                        dispatcher.on('finish', () => {
-                            setTimeout(() => {
-                                playMyAudio()
-                            }, randomTimeGen())
-                        })
+                        const audio = await getInfo(url, myMessage)
+                        if (audio) {
+                            const dispatcher = connection.play(audio, {
+                                bitrate: bitrate
+                            })
+                            dispatcher.on('finish', () => {
+                                setTimeout(() => {
+                                    playMyAudio()
+                                }, randomTimeGen())
+                            })
+                        }
                     }
                     playMyAudio()
                 }
@@ -102,16 +100,15 @@ client.on('message', async (message) => {
             setTimeout(() => message.channel.stopTyping(), 10000)
             const connection = await message.member.voice.channel.join()
             const url = await trending(message)
-            const dispatcher = connection.play(await ytdl(url, {
-                filter: 'audioonly',
-                quality: 'highestaudio',
-                highWaterMark: 1 << 25
-            }), {
-                bitrate: bitrate
-            })
-            dispatcher.on('finish', () => {
-                message.member.voice.channel.leave()
-            })
+            const audio = await getInfo(url, message)
+            if (audio) {
+                const dispatcher = connection.play(audio, {
+                    bitrate: message.member.voice.channel.bitrate
+                })
+                dispatcher.on('finish', () => {
+                    message.member.voice.channel.leave()
+                })
+            }
         } catch (e) {
             console.log(e)
         }
