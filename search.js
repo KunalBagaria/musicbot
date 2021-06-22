@@ -9,8 +9,9 @@ const searchInfo = async (args, message, reply) => {
         const thumbnail = video.thumbnail.url
         const embed = new Discord.MessageEmbed()
             .setColor('RANDOM')
-            .setTitle('Now Playing on an infinite loop')
-            .setDescription(title)
+            .setURL(`https://www.youtube.com/watch?v=${video.id}`)
+            .setTitle(title)
+            .setDescription('Now Playing on an infinite loop')
             .setImage(thumbnail)
         message.reply(embed)
         message.channel.stopTyping()
