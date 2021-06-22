@@ -4,16 +4,16 @@ import Discord from 'discord.js'
 const youtubeUrl = async (args, message, reply) => {
     let url
     try {
-        const output = await youtubedl(args, {
-            dumpJson: true
-        })
-        if (output && output?.is_live) {
-            const liveEmbed = new Discord.MessageEmbed()
-                .setColor('RANDOM')
-                .setTitle('Sorry, live videos are not supported yet')
-            message.reply(liveEmbed)
-        } else if (output) {
-            if (reply) {
+        if (reply) {
+            const output = await youtubedl(args, {
+                dumpJson: true
+            })
+            if (output && output?.is_live) {
+                const liveEmbed = new Discord.MessageEmbed()
+                    .setColor('RANDOM')
+                    .setTitle('Sorry, live videos are not supported yet')
+                message.reply(liveEmbed)
+            } else if (output) {
                 const videoEmbed = new Discord.MessageEmbed()
                     .setColor('RANDOM')
                     .setTitle(output.title)
@@ -22,7 +22,17 @@ const youtubeUrl = async (args, message, reply) => {
                     .setImage(output.thumbnail)
                     .setFooter(`Published by ${output.uploader}`)
                 message.reply(videoEmbed)
+                const audio = await youtubedl(args, {
+                    format: 'bestaudio',
+                    getUrl: true
+                })
+                url = audio
+                if (!url) {
+                    const fakeInfo = await youtubeUrl(args, message, reply)
+                }
+                message.channel.stopTyping()
             }
+        } else {
             const audio = await youtubedl(args, {
                 format: 'bestaudio',
                 getUrl: true
