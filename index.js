@@ -1,10 +1,9 @@
 import Discord from 'discord.js'
-import getVideoInfo from './videoInfo.js'
 import helpEmbed from './help.js'
 import searchInfo from './search.js'
 import trending from './trending.js'
 import dotenv from 'dotenv'
-import getInfo from './getUrl.js'
+import youtubeUrl from './youtubedl.js'
 
 const client = new Discord.Client()
 
@@ -32,7 +31,7 @@ client.on('message', async (message) => {
 
                 const args = message.content.split(' ').slice(1).join(" ")
                 const regexp = /(?:.+?)?(?:\/v\/|watch\/|\?v=|\&v=|youtu\.be\/|\/v=|^youtu\.be\/)([a-zA-Z0-9_-]{11})+/;
-
+                const urlexp = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
                 const channel = message.member.voice.channel
                 const connection = await channel.join();
                 const bitrate = message.member.voice.channel.bitrate
@@ -40,12 +39,11 @@ client.on('message', async (message) => {
                 
                 if (regexp.test(args)) {
                     const playMyMusic = async (reply) => {
-                        const audio = await getInfo(args, myMessage)
+                        const audio = await youtubeUrl(args, myMessage, reply)
                         if (audio) {
                             const dispatcher = connection.play(audio, {
                                 bitrate: bitrate
                             })
-                            dispatcher.on('start', () => getVideoInfo(args, myMessage, reply))
                             dispatcher.on('finish', () => {
                                 setTimeout(() => {
                                     playMyMusic(false)
@@ -54,10 +52,15 @@ client.on('message', async (message) => {
                         }
                     }
                     playMyMusic(true)
+                } else if (urlexp.test(args)) {
+                    const linkEmbed = new Discord.MessageEmbed()
+                        .setColor('RANDOM')
+                        .setTitle('Sorry, only YouTube links are supported right now')
+                    message.reply(linkEmbed)
                 } else {
-                    const url = await searchInfo(args, message, true)
+                    const url = await searchInfo(args, myMessage, true)
                     const playMyAudio = async () => {
-                        const audio = await getInfo(url, myMessage)
+                        const audio = await youtubeUrl(url, myMessage, false)
                         if (audio) {
                             const dispatcher = connection.play(audio, {
                                 bitrate: bitrate
@@ -98,15 +101,16 @@ client.on('message', async (message) => {
         try {
             message.channel.startTyping()
             setTimeout(() => message.channel.stopTyping(), 10000)
-            const connection = await message.member.voice.channel.join()
+            const trendChannel = message.member.voice.channel
+            const connection = await trendChannel.join()
             const url = await trending(message)
-            const audio = await getInfo(url, message)
+            const audio = await youtubeUrl(url, message, true)
             if (audio) {
                 const dispatcher = connection.play(audio, {
-                    bitrate: message.member.voice.channel.bitrate
+                    bitrate: trendChannel.bitrate
                 })
                 dispatcher.on('finish', () => {
-                    message.member.voice.channel.leave()
+                    trendChannel.leave()
                 })
             }
         } catch (e) {
