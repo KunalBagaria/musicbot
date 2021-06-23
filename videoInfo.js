@@ -11,14 +11,14 @@ const getVideoInfo = async (url, message, reply) => {
         const thumbnail = thumbnailDetail.url
         const title = info.videoDetails.title
         const isLive = info.videoDetails.isLive
-
+        const creator = info.videoDetails.author
         const videoEmbed = new Discord.MessageEmbed()
             .setColor('RANDOM')
             .setImage(thumbnail)
-            .setTitle(`${isLive ? '🛑' : ''} Now playing${isLive ? '' : ' on an infinite loop'}:`)
-            .setDescription(title)
+            .setDescription(`${isLive ? '🛑' : ''} Now playing${isLive ? '' : ' on an infinite loop'}:`)
+            .setTitle(title)
             .setURL(url)
-            .setFooter('This musicbot is made by Kunal Bagaria ● https://github.com/kb24x7/musicbot')
+            .setFooter(`Published by ${creator.name}`)
 
         message.reply(videoEmbed)
         message.channel.stopTyping()

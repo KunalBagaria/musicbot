@@ -1,9 +1,10 @@
+import ytdl from 'ytdl-core'
 import Discord from 'discord.js'
 import helpEmbed from './help.js'
 import searchInfo from './search.js'
 import trending from './trending.js'
 import dotenv from 'dotenv'
-import youtubeUrl from './youtubedl.js'
+import getVideoInfo from './videoInfo.js'
 
 const client = new Discord.Client()
 
@@ -32,24 +33,30 @@ client.on('message', async (message) => {
                 const args = message.content.split(' ').slice(1).join(" ")
                 const regexp = /(?:.+?)?(?:\/v\/|watch\/|\?v=|\&v=|youtu\.be\/|\/v=|^youtu\.be\/)([a-zA-Z0-9_-]{11})+/;
                 const urlexp = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
+
                 const channel = message.member.voice.channel
                 const connection = await channel.join();
+
                 const bitrate = message.member.voice.channel.bitrate
                 const myMessage = message
-                
+
                 if (regexp.test(args)) {
                     const playMyMusic = async (reply) => {
-                        const audio = await youtubeUrl(args, myMessage, reply)
-                        if (audio) {
-                            const dispatcher = connection.play(audio, {
+                        // const audio = await youtubeUrl(args, myMessage, reply)
+                        // if (audio) {
+                        // const dispatcher = connection.play(await ytdl(args))
+                            const dispatcher = connection.play(ytdl(arg, {
+                                highWaterMark: 1 << 25
+                            }), {
                                 bitrate: bitrate
                             })
+                            dispatcher.on('start', () => getVideoInfo(args, myMessage, reply))
                             dispatcher.on('finish', () => {
                                 setTimeout(() => {
                                     playMyMusic(false)
                                 }, randomTimeGen())
                             })
-                        }
+                        // }
                     }
                     playMyMusic(true)
                 } else if (urlexp.test(args)) {
@@ -60,9 +67,11 @@ client.on('message', async (message) => {
                 } else {
                     const url = await searchInfo(args, myMessage, true)
                     const playMyAudio = async () => {
-                        const audio = await youtubeUrl(url, myMessage, false)
-                        if (audio) {
-                            const dispatcher = connection.play(audio, {
+                        // const audio = await youtubeUrl(url, myMessage, false)
+                        // if (audio) {
+                            const dispatcher = connection.play(ytdl(url, {
+                                highWaterMark: 1 << 25
+                            }), {
                                 bitrate: bitrate
                             })
                             dispatcher.on('finish', () => {
@@ -70,7 +79,7 @@ client.on('message', async (message) => {
                                     playMyAudio()
                                 }, randomTimeGen())
                             })
-                        }
+                        // }
                     }
                     playMyAudio()
                 }
@@ -104,15 +113,17 @@ client.on('message', async (message) => {
             const trendChannel = message.member.voice.channel
             const connection = await trendChannel.join()
             const url = await trending(message)
-            const audio = await youtubeUrl(url, message, true)
-            if (audio) {
-                const dispatcher = connection.play(audio, {
+            // const audio = await youtubeUrl(url, message, true)
+            // if (audio) {
+                const dispatcher = connection.play(ytdl(url, {
+                    highWaterMark: 1 << 25
+                }), {
                     bitrate: trendChannel.bitrate
                 })
                 dispatcher.on('finish', () => {
                     trendChannel.leave()
                 })
-            }
+            // }
         } catch (e) {
             console.log(e)
         }
