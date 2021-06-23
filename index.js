@@ -45,7 +45,7 @@ client.on('message', async (message) => {
                         // const audio = await youtubeUrl(args, myMessage, reply)
                         // if (audio) {
                         // const dispatcher = connection.play(await ytdl(args))
-                            const dispatcher = connection.play(ytdl(arg, {
+                            const dispatcher = connection.play(ytdl(args, {
                                 highWaterMark: 1 << 25
                             }), {
                                 bitrate: bitrate
