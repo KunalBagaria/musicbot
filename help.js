@@ -1,4 +1,7 @@
 import Discord from 'discord.js'
+import dotenv from 'dotenv'
+const envFile = dotenv.config()
+const trigger = envFile.PREFIX || process.env.PREFIX || '$'
 
 const helpEmbed = () => {
     const embed = new Discord.MessageEmbed()
@@ -8,15 +11,15 @@ const helpEmbed = () => {
         .setDescription("This bot will automatically loop your singleton links")
         .addFields(
             {
-                name: '➦ $play link/search for video',
+                name: `➦ ${trigger}play link/search for video`,
                 value: 'Plays your YouTube URLs or Keywords'
             },
             {
-                name: '➦ $stop',
+                name: `➦ ${trigger}stop`,
                 value: 'Stops playing in your server'
             },
             {
-                name: '➦ $trending',
+                name: `➦ ${trigger}trending`,
                 value: 'Plays a top trending video from YouTube'
             },
         )

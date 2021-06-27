@@ -5,7 +5,10 @@ import trending from './trending.js'
 import dotenv from 'dotenv'
 import youtubeUrl from './youtubedl.js'
 
+const envFile = dotenv.config()
 const client = new Discord.Client()
+
+const trigger = envFile.PREFIX || process.env.PREFIX || '$'
 
 client.on('ready', async () => {
     console.log("I'm ready")
@@ -21,7 +24,7 @@ const randomTimeGen = () => {
 client.on('message', async (message) => {
     let messageContent = message.content.toLowerCase()
     if (message.author.bot) return
-    if (messageContent.startsWith('$play') && message.member.voice.channel) {
+    if (messageContent.startsWith(`${trigger}play`) && message.member.voice.channel) {
 
         const playMusic = async () => {
             try {
@@ -81,7 +84,7 @@ client.on('message', async (message) => {
 
         playMusic()
 
-    } else if ((messageContent.startsWith('$stop') || messageContent.startsWith('$leave')) && message.member.voice.channel) {
+    } else if ((messageContent.startsWith(`${trigger}stop`) || messageContent.startsWith(`${trigger}leave`)) && message.member.voice.channel) {
         try {
             message.member.voice.channel.leave()
             const leaveEmbed = new Discord.MessageEmbed()
@@ -95,9 +98,9 @@ client.on('message', async (message) => {
                 .setColor('RED')
             message.reply(leaveEmbed)
         }
-    } else if (messageContent === '$help') {
+    } else if (messageContent === `${trigger}help`) {
         message.reply(helpEmbed())
-    } else if (messageContent === '$trending' && message.member.voice.channel) {
+    } else if (messageContent === `${trigger}trending` && message.member.voice.channel) {
         try {
             message.channel.startTyping()
             setTimeout(() => message.channel.stopTyping(), 10000)
@@ -119,13 +122,9 @@ client.on('message', async (message) => {
     }
 })
 
-const envFile = dotenv.config()
 
-if (envFile.TOKEN) {
-    client.login(envFile.TOKEN)
-} else {
-    client.login(process.env.TOKEN)
-}
+const token = envFile.TOKEN || process.env.TOKEN
+client.login(token)
 
 process.on('uncaughtException', (err) => {
     console.error('There was an uncaught error', err)
