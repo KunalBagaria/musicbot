@@ -17,32 +17,19 @@ const youtubeUrl = async (args, message, reply) => {
                 const videoEmbed = new Discord.MessageEmbed()
                     .setColor('RANDOM')
                     .setTitle(output.title)
-                    .setDescription('Now playing on an infinite loop')
+                    .setDescription('Now Playing')
                     .setURL(args)
                     .setImage(output.thumbnail)
                     .setFooter(`Published by ${output.uploader}`)
                 message.reply(videoEmbed)
-                const audio = await youtubedl(args, {
-                    format: 'bestaudio',
-                    getUrl: true
-                })
-                url = audio
-                if (!url) {
-                    const fakeInfo = await youtubeUrl(args, message, reply)
-                }
-                message.channel.stopTyping()
             }
-        } else {
-            const audio = await youtubedl(args, {
-                format: 'bestaudio',
-                getUrl: true
-            })
-            url = audio
-            if (!url) {
-                const fakeInfo = await youtubeUrl(args, message, reply)
-            }
-            message.channel.stopTyping()
         }
+        const audio = await youtubedl(args, {
+            format: 'bestaudio',
+            getUrl: true
+        })
+        url = audio ? audio : await youtubeUrl(args, message, reply)
+        message.channel.stopTyping()
     } catch (e) {
         console.log(e)
     }

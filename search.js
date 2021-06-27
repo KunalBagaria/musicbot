@@ -11,7 +11,7 @@ const searchInfo = async (args, message, reply) => {
             .setColor('RANDOM')
             .setURL(`https://www.youtube.com/watch?v=${video.id}`)
             .setTitle(title)
-            .setDescription('Now Playing on an infinite loop')
+            .setDescription('Now playing')
             .setImage(thumbnail)
         message.reply(embed)
         message.channel.stopTyping()
