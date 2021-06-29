@@ -37,7 +37,9 @@ const broadcastAudio = async (broadcastInput) => {
 const playBroadcast = async (broadcast, message) => {
   const myMessage = message
   const connection = await myMessage.member.voice.channel.join()
-  const dispatcher = await connection.play(broadcast)
+  const dispatcher = await connection.play(broadcast, {
+    bitrate: myMessage.member.voice.channel.bitrate
+  })
   dispatcher.on('start', () => {
     console.log(queue[songNumber])
   })
