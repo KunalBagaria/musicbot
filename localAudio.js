@@ -21,7 +21,7 @@ const broadcastAudio = async (broadcastInput) => {
   const startBroadcast = () => {
     if (queue[0]) {
       dispatcher = broadcast.play(fs.createReadStream(queue[songNumber]))
-      dispatcher.on('start' => {
+      dispatcher.on('start', () => {
         console.log(queue[songNumber])
       })
       dispatcher.on('finish', () => {
