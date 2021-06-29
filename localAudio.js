@@ -21,8 +21,7 @@ const broadcastAudio = async (broadcastInput) => {
   const startBroadcast = () => {
     if (queue[0]) {
       dispatcher = broadcast.play(queue[songNumber], {
-        bitrate: 192000,
-        highWaterMark: 1 << 25
+        bitrate: 192000
       })
       dispatcher.on('finish', () => {
         if (songNumber + 1 === queue.length) {
