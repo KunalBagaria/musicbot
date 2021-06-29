@@ -6,7 +6,7 @@ let songNumber = 0
 let dispatcher
 
 const checkIfAudioFile = (fileName) => {
-  const allowedFormats = ['mp3', 'webm', 'wav', 'ogg']
+  const allowedFormats = ['mp3', 'webm', 'wav', 'ogg', 'm4a']
   const extension = fileName.split('.').pop()
   return allowedFormats.includes(extension)
 }
