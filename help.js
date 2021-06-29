@@ -22,6 +22,14 @@ const helpEmbed = () => {
                 name: `➦ ${trigger}trending`,
                 value: 'Plays a top trending video from YouTube'
             },
+            {
+              name: `➦ ${trigger}queue`,
+              value: `Shows the queue for this server.`
+            },
+            {
+              name: `➦ ${trigger}skip`,
+              value: `Skips the current song.`
+            }
         )
         .setFooter('This musicbot is made by Kunal Bagaria ● https://github.com/kb24x7/musicbot')
     return embed

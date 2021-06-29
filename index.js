@@ -4,6 +4,7 @@ import searchInfo from './search.js'
 import trending from './trending.js'
 import dotenv from 'dotenv'
 import youtubeUrl from './youtubedl.js'
+import { broadcastAudio, playBroadcast } from './localAudio.js'
 
 const envFile = dotenv.config()
 const client = new Discord.Client()
@@ -12,19 +13,9 @@ const trigger = envFile.PREFIX || process.env.PREFIX || '$'
 
 const queue = []
 let songNumber = 0
+let broadcast
 
-client.on('ready', async () => {
-    console.log("I'm ready")
-    client.user.setActivity(`Music 24x7 🎸`, {
-        type: "PLAYING"
-    })
-})
-
-const randomTimeGen = () => {
-    return Math.floor(Math.random() * (15000 - 3000) + 3000)
-}
-
-const playMusic = async (message) => {
+const playMusic = async (message, skip) => {
     try {
         message.channel.startTyping()
         setTimeout(() => message.channel.stopTyping(), 10000)
@@ -53,7 +44,7 @@ const playMusic = async (message) => {
             }
 
             if (!audio) {
-                audio = await youtubeUrl(url, myMessage, false) 
+                audio = await youtubeUrl(url, myMessage, false)
             }
 
             const dispatcher = connection.play(audio, {
@@ -66,7 +57,7 @@ const playMusic = async (message) => {
                     songNumber++
                 }
                 setTimeout(() => {
-                    playMyAudio(false)
+                    playMyAudio(true)
                 }, randomTimeGen())
             })
         }
@@ -76,6 +67,13 @@ const playMusic = async (message) => {
             queue.push(myMessage.content.split(' ').slice(1).join(" "))
             playMyAudio(true)
             myMessage.channel.stopTyping()
+        } else if (skip) {
+            if (songNumber + 1 === queue.length) {
+                songNumber = 0
+            } else {
+                songNumber++
+            }
+            playMyAudio(true)
         } else {
             queue.push(myMessage.content.split(' ').slice(1).join(" "))
             const queueAddEmbed = new Discord.MessageEmbed()
@@ -91,11 +89,31 @@ const playMusic = async (message) => {
     }
 }
 
+
+client.on('ready', async () => {
+    console.log("I'm ready")
+    client.user.setActivity(`Music 24x7 🎸`, {
+        type: "PLAYING"
+    })
+    broadcast = client.voice.createBroadcast();
+    broadcastAudio(broadcast)
+})
+
+const randomTimeGen = () => {
+    return Math.floor(Math.random() * (15000 - 3000) + 3000)
+}
+
 client.on('message', async (message) => {
     let messageContent = message.content.toLowerCase()
     if (message.author.bot) return
     if (messageContent.startsWith(`${trigger}play`) && message.member.voice.channel) {
-        playMusic(message)
+        playMusic(message, false)
+    } else if (messageContent === `${trigger}skip` && message.member.voice.channel) {
+        playMusic(message, true)
+        const skipEmbed = new Discord.MessageEmbed()
+          .setTitle('The current video has been skipped')
+          .setColor('RANDOM')
+        message.reply(skipEmbed)
     } else if ((messageContent.startsWith(`${trigger}stop`) || messageContent.startsWith(`${trigger}leave`)) && message.member.voice.channel) {
         try {
             message.member.voice.channel.leave()
@@ -138,7 +156,7 @@ client.on('message', async (message) => {
         queue.splice(0, queue.length)
         songNumber = 0
         console.log(queue)
-    } else if (messageContent === `${trigger}queue`) {
+    } else if (messageContent === `${trigger}queue` && message.member.voice.channel) {
         const queueEmbed = new Discord.MessageEmbed()
             .setColor('RANDOM')
             .setTitle('Queue for this server')
@@ -153,6 +171,12 @@ client.on('message', async (message) => {
             queueEmbed.setDescription('Nothing on the queue :/')
         }
         message.reply(queueEmbed)
+    } else if (messageContent === `${trigger}radio`) {
+      playBroadcast(broadcast, message)
+      const foldEmbed = new Discord.MessageEmbed()
+        .setTitle('Now starting radio on your voice channel.')
+        .setColor('RANDOM')
+      message.reply(foldEmbed)
     }
 })
 
