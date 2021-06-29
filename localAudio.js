@@ -21,9 +21,6 @@ const broadcastAudio = async (broadcastInput) => {
   const startBroadcast = () => {
     if (queue[0]) {
       dispatcher = broadcast.play(fs.createReadStream(queue[songNumber]))
-      dispatcher.on('start', () => {
-        console.log(queue[songNumber])
-      })
       dispatcher.on('finish', () => {
         if (songNumber + 1 === queue.length) {
           songNumber = 0
@@ -40,7 +37,10 @@ const broadcastAudio = async (broadcastInput) => {
 const playBroadcast = async (broadcast, message) => {
   const myMessage = message
   const connection = await myMessage.member.voice.channel.join()
-  connection.play(broadcast)
+  const dispatcher = await connection.play(broadcast)
+  dispatcher.on('start', () => {
+    console.log(queue[songNumber])
+  })
 }
 
 export {
