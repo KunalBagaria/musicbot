@@ -4,6 +4,7 @@ import fs from 'fs'
 const queue = []
 let songNumber = 0
 let dispatcher
+let broadcast
 
 const checkIfAudioFile = (fileName) => {
   const allowedFormats = ['mp3', 'webm', 'wav', 'ogg', 'm4a']
@@ -12,7 +13,7 @@ const checkIfAudioFile = (fileName) => {
 }
 
 const broadcastAudio = async (broadcastInput) => {
-  const broadcast = broadcastInput
+  broadcast = broadcastInput
   fs.readdirSync('./audio').forEach((file) => {
     if (checkIfAudioFile(file)) {
       queue.push(`./audio/${file}`)
@@ -45,7 +46,17 @@ const playBroadcast = async (broadcast, message) => {
   })
 }
 
+const skipFile = () => {
+  if (songNumber + 1 === queue.length) {
+    songNumber = 0
+  } else {
+    songNumber++
+  }
+  broadcastAudio(broadcast)
+}
+
 export {
   broadcastAudio,
-  playBroadcast
+  playBroadcast,
+  skipFile
 }
