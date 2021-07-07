@@ -26,7 +26,7 @@ const broadcastAudio = async (message, skip) => {
   const startBroadcast = () => {
     if (queue[0]) {
       dispatcher = connection.play(fs.createReadStream(queue[songNumber]), {
-        bitrate: myMessage.member.voice.channel.bitrate
+        bitrate: 384000
       })
       dispatcher.on('finish', () => {
         if (songNumber + 1 === queue.length) {
