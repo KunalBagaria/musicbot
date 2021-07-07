@@ -4,7 +4,7 @@ import searchInfo from './search.js'
 import trending from './trending.js'
 import dotenv from 'dotenv'
 import youtubeUrl from './youtubedl.js'
-import { broadcastAudio, playBroadcast, skipFile } from './localAudio.js'
+import { broadcastAudio, skipFile } from './localAudio.js'
 
 const envFile = dotenv.config()
 const client = new Discord.Client()
@@ -170,14 +170,8 @@ client.on('message', async (message) => {
             queueEmbed.setDescription('Nothing on the queue :/')
         }
         message.reply(queueEmbed)
-    } else if (messageContent === `${trigger}radio`) {
-      playBroadcast(broadcast, message)
-      const foldEmbed = new Discord.MessageEmbed()
-        .setTitle('Now starting radio on your voice channel.')
-        .setColor('RANDOM')
-      message.reply(foldEmbed)
-    } else if (messageContent === `${trigger}broadcast`) {
-      broadcastAudio(broadcast)
+    } else if (messageContent === `${trigger}broadcast` && message.member.voice.channel) {
+      broadcastAudio(message, false)
       const broadcastEmbed = new Discord.MessageEmbed()
         .setTitle('Now broadcasting audio')
         .setColor('RANDOM')

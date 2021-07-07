@@ -4,7 +4,8 @@ import fs from 'fs'
 const queue = []
 let songNumber = 0
 let dispatcher
-let broadcast
+let myMessage
+let connection
 
 const checkIfAudioFile = (fileName) => {
   const allowedFormats = ['mp3', 'webm', 'wav', 'ogg', 'm4a']
@@ -12,16 +13,21 @@ const checkIfAudioFile = (fileName) => {
   return allowedFormats.includes(extension)
 }
 
-const broadcastAudio = async (broadcastInput) => {
-  broadcast = broadcastInput
-  fs.readdirSync('./audio').forEach((file) => {
-    if (checkIfAudioFile(file)) {
-      queue.push(`./audio/${file}`)
-    }
-  })
+const broadcastAudio = async (message, skip) => {
+  myMessage = message
+  if (!skip) {
+    connection = await myMessage.member.voice.channel.join()
+    fs.readdirSync('./audio').forEach((file) => {
+      if (checkIfAudioFile(file)) {
+        queue.push(`./audio/${file}`)
+      }
+    })
+  }
   const startBroadcast = () => {
     if (queue[0]) {
-      dispatcher = broadcast.play(fs.createReadStream(queue[songNumber]))
+      dispatcher = connection.play(fs.createReadStream(queue[songNumber]), {
+        bitrate: myMessage.member.voice.channel.bitrate
+      })
       dispatcher.on('finish', () => {
         if (songNumber + 1 === queue.length) {
           songNumber = 0
@@ -35,28 +41,16 @@ const broadcastAudio = async (broadcastInput) => {
   startBroadcast()
 }
 
-const playBroadcast = async (broadcast, message) => {
-  const myMessage = message
-  const connection = await myMessage.member.voice.channel.join()
-  const dispatcher = await connection.play(broadcast, {
-    bitrate: myMessage.member.voice.channel.bitrate
-  })
-  dispatcher.on('start', () => {
-    console.log(queue[songNumber])
-  })
-}
-
 const skipFile = () => {
   if (songNumber + 1 === queue.length) {
     songNumber = 0
   } else {
     songNumber++
   }
-  broadcastAudio(broadcast)
+  broadcastAudio(myMessage, true)
 }
 
 export {
   broadcastAudio,
-  playBroadcast,
   skipFile
 }
